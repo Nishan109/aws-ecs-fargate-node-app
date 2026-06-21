@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevFlow Dashboard | ECS Task Orchestration</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #020617 100%);
+            --panel-bg: rgba(30, 41, 59, 0.7);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #06b6d4;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Navigation */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 2rem;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--panel-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 2.25rem;
+            height: 2.25rem;
+            background: linear-gradient(135deg, var(--accent), var(--info));
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .logo-title h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            background: linear-gradient(to right, #ffffff, #c7d2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-title p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .env-badge {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .env-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background-color: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        /* Container Layout */
+        .dashboard-container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: 1.8fr 1.2fr;
+            gap: 1.75rem;
+            flex-grow: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Glassmorphic Panel Base */
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* Analytics Overview Banner */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.75rem;
+        }
+
+        @media (max-width: 640px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-card {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-trend {
+            font-size: 0.7rem;
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+
+        /* Task Center */
+        .task-center-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .section-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Task Controls (Tabs/Filters) */
+        .filter-tabs {
+            display: flex;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 0.25rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--panel-border);
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.35rem 0.85rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-btn.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Task List Container */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            max-height: 520px;
+            overflow-y: auto;
+            padding-right: 0.25rem;
+        }
+
+        .task-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .task-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .task-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--text-secondary);
+            background: rgba(30, 41, 59, 0.2);
+            border: 1px dashed var(--panel-border);
+            border-radius: var(--radius-md);
+        }
+
+        /* Task Card */
+        .task-card {
+            background: rgba(30, 41, 59, 0.3);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--radius-md);
+            padding: 1.1rem 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .task-card:hover {
+            border-color: rgba(99, 102, 241, 0.25);
+            background: rgba(30, 41, 59, 0.5);
+            transform: translateX(4px);
+        }
+
+        .task-card.completed {
+            background: rgba(15, 23, 42, 0.2);
+            opacity: 0.65;
+        }
+
+        /* custom checkbox toggle */
+        .toggle-container {
+            margin-top: 0.15rem;
+        }
+
+        .checkbox-custom {
+            width: 1.2rem;
+            height: 1.2rem;
+            border-radius: 50%;
+            border: 2px solid var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .checkbox-custom::after {
+            content: '✓';
+            font-size: 0.75rem;
+            color: transparent;
+            font-weight: 700;
+        }
+
+        .task-card.completed .checkbox-custom {
+            background: var(--success);
+            border-color: var(--success);
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+        }
+
+        .task-card.completed .checkbox-custom::after {
+            color: white;
+        }
+
+        .task-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .task-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .task-card.completed .task-title {
+            text-decoration: line-through;
+            color: var(--text-secondary);
+        }
+
+        .task-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .task-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        /* Badges */
+        .badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .badge-priority-high {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .badge-priority-medium {
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .badge-priority-low {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .badge-cat-devops {
+            background: rgba(167, 139, 250, 0.12);
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            color: #a78bfa;
+        }
+
+        .badge-cat-feature {
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+        }
+
+        .badge-cat-testing {
+            background: rgba(6, 182, 212, 0.12);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            color: #67e8f9;
+        }
+
+        .badge-cat-docs {
+            background: rgba(236, 72, 153, 0.12);
+            border: 1px solid rgba(236, 72, 153, 0.2);
+            color: #f472b6;
+        }
+
+        .task-time {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-left: auto;
+        }
+
+        /* Actions */
+        .task-actions {
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: var(--transition);
+            align-self: center;
+        }
+
+        .task-card:hover .task-actions {
+            opacity: 1;
+        }
+
+        .btn-icon {
+            width: 1.75rem;
+            height: 1.75rem;
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--panel-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--text-primary);
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+        }
+
+        /* Add Form Panel */
+        .side-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.875rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .select-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 1.25rem;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
+            border: none;
+            color: white;
+            padding: 0.8rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+            margin-top: 0.5rem;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(99, 102, 241, 0.4);
+        }
+
+        /* ECS DevOps Monitoring Console */
+        .ecs-console {
+            margin-top: 1.75rem;
+        }
+
+        .console-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--panel-border);
+            margin-bottom: 1rem;
+        }
+
+        .console-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #a5b4fc;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .console-pulse {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        .console-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-size: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .console-key {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .console-val {
+            color: var(--text-primary);
+            font-family: monospace;
+            font-weight: 600;
+            max-width: 60%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .console-metrics {
+            margin-top: 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .metric-box {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+
+        .metric-val {
+            font-size: 1.15rem;
+            font-weight: 700;
+            font-family: monospace;
+            color: var(--text-primary);
+        }
+
+        .metric-bar-bg {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .metric-bar-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--accent), var(--info));
+            width: 0%;
+            transition: width 1s ease-in-out;
+        }
+
+        .ecs-logs {
+            background: rgba(2, 6, 23, 0.85);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--radius-sm);
+            font-family: 'Courier New', Courier, monospace;
+            padding: 0.75rem;
+            font-size: 0.65rem;
+            color: #38bdf8;
+            margin-top: 1.25rem;
+            height: 100px;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+
+        .log-line {
+            margin-bottom: 0.25rem;
+        }
+
+        .log-time {
+            color: #6366f1;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--panel-border);
+            background: rgba(15, 23, 42, 0.4);
+            margin-top: auto;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-section">
+            <div class="logo-icon">DF</div>
+            <div class="logo-title">
+                <h1>DevFlow Orchestrator</h1>
+                <p>v1.2.0-stable &bull; Production Task Manager</p>
+            </div>
+        </div>
+        <div class="env-badge">
+            AWS ECS: Active Deployment
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <!-- Main Column: Tasks & Charts -->
+        <main>
+            <!-- Stats Grid Banner -->
+            <div class="stats-grid">
+                <% 
+                   let total = tasks.length;
+                   let completed = tasks.filter(t => t.completed).length;
+                   let pending = total - completed;
+                   let rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+                %>
+                <div class="stat-card">
+                    <span class="stat-label">Total Orchestrated</span>
+                    <span class="stat-value"><%= total %></span>
+                    <span class="stat-trend" style="color: var(--accent);">Tasks Configured</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Deploying / Pending</span>
+                    <span class="stat-value" style="color: var(--warning);"><%= pending %></span>
+                    <span class="stat-trend" style="color: var(--warning);">Awaiting execution</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Completed</span>
+                    <span class="stat-value" style="color: var(--success);"><%= completed %></span>
+                    <span class="stat-trend" style="color: var(--success);">Build and deploy success</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Completion Efficiency</span>
+                    <span class="stat-value" style="color: var(--info);"><%= rate %>%</span>
+                    <span class="stat-trend" style="color: var(--info);">Target: 85% SLA</span>
+                </div>
+            </div>
+
+            <!-- Task Center Panel -->
+            <div class="glass-panel">
+                <div class="task-center-header">
+                    <h2 class="section-title">Active Work Items & Pipeline Stages</h2>
+                    <div class="filter-tabs">
+                        <button class="filter-btn active" onclick="filterTasks('all', this)">All</button>
+                        <button class="filter-btn" onclick="filterTasks('pending', this)">Pending</button>
+                        <button class="filter-btn" onclick="filterTasks('completed', this)">Completed</button>
+                    </div>
+                </div>
+
+                <div class="task-list">
+                    <% if (tasks.length === 0) { %>
+                        <div class="empty-state">
+                            <h3>No orchestrations scheduled.</h3>
+                            <p style="margin-top: 0.5rem; font-size: 0.85rem;">Add a new container pipeline stage or dev task using the Orchestrator Console.</p>
+                        </div>
+                    <% } else { %>
+                        <% tasks.forEach(function(task, index) { %>
+                            <div class="task-card <%= task.completed ? 'completed' : '' %>" data-status="<%= task.completed ? 'completed' : 'pending' %>">
+                                <div class="toggle-container">
+                                    <a href="/tasks/toggle/<%= index %>" style="text-decoration: none;">
+                                        <div class="checkbox-custom" title="Toggle status"></div>
+                                    </a>
+                                </div>
+                                <div class="task-content">
+                                    <div class="task-title"><%= task.title %></div>
+                                    <div class="task-desc"><%= task.description || 'No detailed instructions configured.' %></div>
+                                    <div class="task-meta">
+                                        <span class="badge badge-priority-<%= task.priority ? task.priority.toLowerCase() : 'medium' %>">
+                                            <%= task.priority || 'Medium' %>
+                                        </span>
+                                        <span class="badge badge-cat-<%= task.category ? task.category.toLowerCase() : 'feature' %>">
+                                            <%= task.category || 'Feature' %>
+                                        </span>
+                                        <span class="task-time">Created: <%= task.createdAt || 'N/A' %></span>
+                                    </div>
+                                </div>
+                                <div class="task-actions">
+                                    <a href="/tasks/<%= index %>" class="btn-icon" title="Edit Task details">✎</a>
+                                    <a href="/tasks/delete/<%= index %>" class="btn-icon btn-delete" title="Decommission task">✘</a>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } %>
+                </div>
+            </div>
+        </main>
+
+        <!-- Sidebar: Add Form & Cloud Monitor -->
+        <aside class="side-form">
+            <!-- Add Task Glass Panel -->
+            <div class="glass-panel">
+                <h2 class="section-title" style="margin-bottom: 1.25rem; font-size: 1.1rem; color: #a5b4fc;">Orchestrator Control Console</h2>
+                <form action="/tasks/add/" method="post" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="title">Stage / Task Name</label>
+                        <input type="text" name="title" id="title" class="form-input" placeholder="e.g., Deploy Elasticache Redis nodes" required autofocus />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Technical Description</label>
+                        <textarea name="description" id="description" class="form-input" placeholder="Configuration changes, parameters, port mappings..."></textarea>
+                    </div>
+
+                    <div class="select-row">
+                        <div class="form-group">
+                            <label for="priority">Priority SLA</label>
+                            <select name="priority" id="priority" class="form-input form-select">
+                                <option value="High">High</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Cluster Tag</label>
+                            <select name="category" id="category" class="form-input form-select">
+                                <option value="DevOps">DevOps</option>
+                                <option value="Feature" selected>Feature</option>
+                                <option value="Testing">Testing</option>
+                                <option value="Docs">Documentation</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <span>Deploy Stage Task</span>
+                    </button>
+                </form>
+            </div>
+
+
+        </aside>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 DevFlow Task Manager. Managed via ECR Docker image and deployed to AWS ECS Fargate Cluster.</p>
+    </footer>
+
+    <!-- Client-side Interactions -->
+    <script>
+        // Tab Filtering
+        function filterTasks(status, btnElement) {
+            // Update active button styling
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            // Filter task list
+            const cards = document.querySelectorAll('.task-card');
+            cards.forEach(card => {
+                if (status === 'all') {
+                    card.style.display = 'flex';
+                } else {
+                    const cardStatus = card.getAttribute('data-status');
+                    if (cardStatus === status) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+
+    </script>
+</body>
+</html>

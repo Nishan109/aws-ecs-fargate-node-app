@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Orchestration Stage | DevFlow</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #020617 100%);
+            --panel-bg: rgba(30, 41, 59, 0.7);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent: #6366f1;
+            --success: #10b981;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .edit-container {
+            max-width: 550px;
+            width: 100%;
+        }
+
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        .logo-icon {
+            width: 2rem;
+            height: 2rem;
+            background: linear-gradient(135deg, var(--accent), #06b6d4);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .logo-title h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #ffffff, #c7d2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .title-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.875rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .select-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 1.25rem;
+        }
+
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.8rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+
+        .btn-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--panel-border);
+            color: var(--text-secondary);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="edit-container">
+        <div class="glass-panel">
+            <div class="logo-section">
+                <div class="logo-icon">DF</div>
+                <div class="logo-title">
+                    <h1>Modify Orchestration Stage</h1>
+                </div>
+            </div>
+
+            <p class="title-meta">Modify the technical configuration and details for the selected work item.</p>
+
+            <form action="/tasks/edit/<%= taskIdx %>" method="post">
+                <!-- Use methodOverride for PUT -->
+                <input type="hidden" name="_method" value="PUT">
+
+                <div class="form-group">
+                    <label for="title">Stage / Task Name</label>
+                    <input type="text" name="title" id="title" class="form-input" value="<%= task.title %>" required autofocus />
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Technical Description</label>
+                    <textarea name="description" id="description" class="form-input"><%= task.description || '' %></textarea>
+                </div>
+
+                <div class="select-row">
+                    <div class="form-group">
+                        <label for="priority">Priority SLA</label>
+                        <select name="priority" id="priority" class="form-input form-select">
+                            <option value="High" <%= task.priority === 'High' ? 'selected' : '' %>>High</option>
+                            <option value="Medium" <%= task.priority === 'Medium' || !task.priority ? 'selected' : '' %>>Medium</option>
+                            <option value="Low" <%= task.priority === 'Low' ? 'selected' : '' %>>Low</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Cluster Tag</label>
+                        <select name="category" id="category" class="form-input form-select">
+                            <option value="DevOps" <%= task.category === 'DevOps' ? 'selected' : '' %>>DevOps</option>
+                            <option value="Feature" <%= task.category === 'Feature' || !task.category ? 'selected' : '' %>>Feature</option>
+                            <option value="Testing" <%= task.category === 'Testing' ? 'selected' : '' %>>Testing</option>
+                            <option value="Docs" <%= task.category === 'Docs' ? 'selected' : '' %>>Documentation</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <a href="/tasks" class="btn btn-cancel">Cancel</a>
+                    <button type="submit" class="btn btn-save">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
